@@ -3,6 +3,7 @@ package com.alura.kafka;
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 
+import org.apache.kafka.clients.producer.Callback;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -14,16 +15,22 @@ public class NewOrderMain {
 		KafkaProducer<String, String> producer = new KafkaProducer<String, String>(properties());
 		String value = "3824893748,3234234,324234";
 		ProducerRecord<String, String> record = new ProducerRecord<String, String>("ECOMMERCE_NEW_ORDER", value, value);
+		String email = "Email sendo enviado agora...";
+		ProducerRecord<String, String> emailRecord = new ProducerRecord<String, String>("ECOMMERCE_NEW_EMAIL", email,
+				email);
 
-		// REGISTRO
-		producer.send(record, ( data, ex) -> {
+		Callback callback = (data, ex) -> {
 			if (ex != null) {
 				ex.printStackTrace();
 				return;
 			}
 			System.out.println("Sucesso enviado " + data.topic() + ":::partition " + data.partition() + "| offser "
 					+ data.offset() + "/ timestamp " + data.timestamp());
-		}).get();
+		};
+
+		producer.send(record, callback).get();
+
+		producer.send(emailRecord, callback).get();
 	}
 
 	private static Properties properties() {
