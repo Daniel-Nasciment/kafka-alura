@@ -16,7 +16,7 @@ public class NewOrderMain {
 		ProducerRecord<String, String> record = new ProducerRecord<String, String>("ECOMMERCE_NEW_ORDER", value, value);
 
 		// REGISTRO
-		producer.send(record, (data, ex) -> {
+		producer.send(record, ( data, ex) -> {
 			if (ex != null) {
 				ex.printStackTrace();
 				return;
