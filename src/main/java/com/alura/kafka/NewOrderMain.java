@@ -46,29 +46,11 @@ public class NewOrderMain {
 	}
 	
 	/*
-	 * Caso tenha mais de um serviço dentro de um mesmo grupo, é necessário
-	 * verificar as partições do tópico, caso tenha apenas 1, somente um consumidor
-	 * recebera as mensagens, e caso dois consumidores partilhem da mesma partição,
-	 * ambos irão processar as mesmas informações.
-	 * 
-	 * 
-	 * Para alterar as partições é necessário aumentar o número de partições para novos topicos 
-	 * dentro do arquivo "Config/Server.properties"
-	 * 
-	 * 
-	 * E para alterar de um tópico já existente o comando seria:
-	 * ./bin/windows/kafka-topics.bat --alter --zookeeper localhost:2181 --topic NOME_DO_TOPICO 
-	 * --partions NUMERO_DE_PARTIÇÕES
-	 * 
-	 * 
-	 * CASO UM ÚNICO SERVICE DE UM DETERMINADO GRUPO ESTEJA EXECUTANDO, ELE TOMARÁ CONTA DE TODAS AS PARTIÇÕES DO 
-	 * TÓPICO
-	 * E CASO SEJA EXECUTADOS MAIS SERVICES É FEITA A PARALELIZAÇÃO/DISTRIBUIDO ENTRE OS MESMOS 
-	 * 
-	 * **# NÚMERO DE PARTIÇÕES TEM QUE SER >= NÚMERO DE CONSUMIDORES DE UM GRUPO
-	 * 
-	 * PARA O KAFKA DIRECIONAR ENTRE AS PARTIÇÕES DEPENDE DA HASH DA CHAVE/KEY
-	 * 
+	 * NO REBALANCEAMENTO AS MENSAGENS NÃO SÃO COMMITADAS
+	 * NO CASO DO POLL É FEITO O COMMIT A DETERMINADOS "TANTOS DE MENSAGENS"
+	 * COM A CONFIGURAÇÃO DO CONSUMMER "MAX_POLL" DE 1 EM 1 É FEITO O COMMIT
+	 * DESSA FORMA ELIMINAMOS UM POSSIVEL PROBLEMA DE NECESSITAR O PROCESSAMENTO DA MESMA MENSAGEM
+	 * MAIS DE UMA VEZ  
 	 */ 
 
 }

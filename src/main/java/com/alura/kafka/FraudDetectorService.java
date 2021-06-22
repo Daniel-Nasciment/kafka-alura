@@ -47,6 +47,8 @@ public class FraudDetectorService {
 		// DESSERIALIZAR DE BYTE PARA STRING
 		properties.setProperty(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
 		properties.setProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
+		// 1 A 1 VAI SENDO FEITO O COMMIT || O POLL TEM UM COMMIT "EMBUTIDO"
+		properties.setProperty(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, "1");
 		// RECEBERÁ TODAS AS MENSAGENS
 		properties.setProperty(ConsumerConfig.GROUP_ID_CONFIG, FraudDetectorService.class.getSimpleName());
 
