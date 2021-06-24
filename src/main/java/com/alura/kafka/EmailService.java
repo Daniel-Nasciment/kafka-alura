@@ -8,7 +8,8 @@ public class EmailService {
         EmailService emailService = new EmailService();
         try (KafkaService service = new KafkaService(EmailService.class.getSimpleName(),
                 "ECOMMERCE_SEND_EMAIL",
-                emailService::parse)) {
+                emailService::parse,
+                String.class)) {
             service.run();
         }
     }

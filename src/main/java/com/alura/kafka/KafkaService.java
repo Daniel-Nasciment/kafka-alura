@@ -1,6 +1,5 @@
 package com.alura.kafka;
 
-
 import java.io.Closeable;
 import java.time.Duration;
 import java.util.Collections;
@@ -14,46 +13,50 @@ import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 
-class KafkaService implements Closeable {
-    private final KafkaConsumer<String, String> consumer;
-    private final ConsumerFunction parse;
+//DESERIALIZAR DE STRING PARA O TIPO "T"
+class KafkaService<T> implements Closeable {
+	private final KafkaConsumer<String, T> consumer;
+	private final ConsumerFunction parse;
 
-    KafkaService(String groupId, String topic, ConsumerFunction parse) {
+	KafkaService(String groupId, String topic, ConsumerFunction parse, Class<T> type) {
         this.parse = parse;
-        this.consumer = new KafkaConsumer<>(properties(groupId));
+        this.consumer = new KafkaConsumer<>(properties(type, groupId));
         consumer.subscribe(Collections.singletonList(topic));
     }
-    
-    KafkaService(String groupId, Pattern topic, ConsumerFunction parse) {
-        this.parse = parse;
-        this.consumer = new KafkaConsumer<>(properties(groupId));
-        consumer.subscribe(topic);
-    }
 
-    void run() {
-        while (true) {
-        	ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(100));
-            if (!records.isEmpty()) {
-                System.out.println("Encontrei " + records.count() + " registros");
-                for (ConsumerRecord<String, String> record : records) {
-                    parse.consume(record);
-                }
-            }
-        }
-    }
+	KafkaService(String groupId, Pattern topic, ConsumerFunction parse, Class<T> type) {
+		this.parse = parse;
+		this.consumer = new KafkaConsumer<>(properties(type, groupId));
+		consumer.subscribe(topic);
+	}
 
-    private static Properties properties(String groupId) {
-        Properties properties = new Properties();
-        properties.setProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "127.0.0.1:9092");
-        properties.setProperty(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
-        properties.setProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
-        properties.setProperty(ConsumerConfig.GROUP_ID_CONFIG, groupId);
-        properties.setProperty(ConsumerConfig.CLIENT_ID_CONFIG, UUID.randomUUID().toString());
-        return properties;
-    }
+	void run() {
+		while (true) {
+			ConsumerRecords<String, T> records = consumer.poll(Duration.ofMillis(100));
+			if (!records.isEmpty()) {
+				System.out.println("Encontrei " + records.count() + " registros");
+				for (ConsumerRecord<String, T> record : records) {
+					parse.consume(record);
+				}
+			}
+		}
+	}
 
-    @Override
-    public void close() {
-        consumer.close();
-    }
+	private Properties properties(Class<T> type, String groupId) {
+		Properties properties = new Properties();
+		properties.setProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "127.0.0.1:9092");
+		properties.setProperty(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
+		//CRIAÇÃO DO DESERIALIZER
+		properties.setProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, GsonDeserializer.class.getName());
+		properties.setProperty(ConsumerConfig.GROUP_ID_CONFIG, groupId);
+		properties.setProperty(ConsumerConfig.CLIENT_ID_CONFIG, UUID.randomUUID().toString());
+		//PROPRIEDADE CRIADA
+		properties.setProperty(GsonDeserializer.TYPE_CONFIG, type.getName());
+		return properties;
+	}
+
+	@Override
+	public void close() {
+		consumer.close();
+	}
 }
