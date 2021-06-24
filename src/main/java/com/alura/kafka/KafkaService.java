@@ -3,6 +3,7 @@ package com.alura.kafka;
 import java.io.Closeable;
 import java.time.Duration;
 import java.util.Collections;
+import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
 import java.util.regex.Pattern;
@@ -18,15 +19,15 @@ class KafkaService<T> implements Closeable {
 	private final KafkaConsumer<String, T> consumer;
 	private final ConsumerFunction parse;
 
-	KafkaService(String groupId, String topic, ConsumerFunction parse, Class<T> type) {
+	KafkaService(String groupId, String topic, ConsumerFunction parse, Class<T> type, Map<String, String> propriedadesExtras) {
         this.parse = parse;
-        this.consumer = new KafkaConsumer<>(properties(type, groupId));
+        this.consumer = new KafkaConsumer<>(properties(type, groupId ,propriedadesExtras));
         consumer.subscribe(Collections.singletonList(topic));
     }
 
-	KafkaService(String groupId, Pattern topic, ConsumerFunction parse, Class<T> type) {
+	KafkaService(String groupId, Pattern topic, ConsumerFunction parse, Class<T> type, Map<String, String> propriedadesExtras) {
 		this.parse = parse;
-		this.consumer = new KafkaConsumer<>(properties(type, groupId));
+		this.consumer = new KafkaConsumer<>(properties(type, groupId, propriedadesExtras));
 		consumer.subscribe(topic);
 	}
 
@@ -42,7 +43,7 @@ class KafkaService<T> implements Closeable {
 		}
 	}
 
-	private Properties properties(Class<T> type, String groupId) {
+	private Properties properties(Class<T> type, String groupId, Map<String, String> propriedadesExtras) {
 		Properties properties = new Properties();
 		properties.setProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "127.0.0.1:9092");
 		properties.setProperty(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
@@ -52,6 +53,7 @@ class KafkaService<T> implements Closeable {
 		properties.setProperty(ConsumerConfig.CLIENT_ID_CONFIG, UUID.randomUUID().toString());
 		//PROPRIEDADE CRIADA
 		properties.setProperty(GsonDeserializer.TYPE_CONFIG, type.getName());
+		properties.putAll(propriedadesExtras);
 		return properties;
 	}
 

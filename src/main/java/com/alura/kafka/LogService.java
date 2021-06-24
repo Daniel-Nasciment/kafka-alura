@@ -1,10 +1,17 @@
 package com.alura.kafka;
 
+import java.util.Map;
 import java.util.regex.Pattern;
 
+import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.common.serialization.StringDeserializer;
 
 public class LogService {
+	
+	// NESSE CASO EU CUSTUMIZO AS PROPRIEDADES DO MEU KAFKASERVICE PELO SEGUINTE MOTIVO:
+	// NESSE CASO NÃO SABEMOS O QUE ESTÁ VINDO (PADRÃO) SE É STRING OU UM OBJETO
+	// NESSE CASO NÃO USARIA O DESERIALIZADOR GSON, MAS SIM O STRING DESERIALIZER
 
 	public static void main(String[] args) {
 
@@ -12,7 +19,8 @@ public class LogService {
 		try (KafkaService service = new KafkaService(LogService.class.getSimpleName(),
                 Pattern.compile("ECOMMERCE.*"),
                 logService::parse,
-                String.class)) {
+                String.class,
+                Map.of(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName()))) {
             service.run();
         }
 
